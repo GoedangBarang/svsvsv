@@ -2,34 +2,111 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProReversal Bot Control Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bot Control Panel</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #ffffff; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; background: #1e1e1e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { text-align: center; color: #00d2ff; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 25px; }
+        /* Gaya Dasar & Mobile-First */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #121212; 
+            color: #ffffff; 
+            margin: 0; 
+            padding: 0;
+            padding-bottom: 80px; /* Memberi ruang untuk tombol mengambang di bawah */
+        }
+        
+        .container { 
+            max-width: 100%; 
+            padding: 15px; 
+            box-sizing: border-box;
+        }
+
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #bbb; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #444; border-radius: 5px; background: #2a2a2a; color: #fff; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #00d2ff; color: #000; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        button:hover { background: #0096c7; }
-        .status-box { padding: 15px; text-align: center; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
-        .on { background: rgba(0, 255, 0, 0.2); color: #00ff00; border: 1px solid #00ff00; }
-        .off { background: rgba(255, 0, 0, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d; }
-        .box-section { background: #222; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333;}
-        .box-title { color: #00d2ff; margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px dotted #444; padding-bottom: 5px; }
-        .flex-row { display: flex; gap: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #ccc; font-size: 14px; }
+        
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #444; 
+            border-radius: 8px; 
+            background: #2a2a2a; 
+            color: #fff; 
+            font-size: 16px; /* Mencegah auto-zoom di iPhone */
+            box-sizing: border-box; 
+        }
+
+        .status-box { 
+            padding: 15px; 
+            text-align: center; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .on { background: rgba(0, 255, 0, 0.15); color: #00ff00; border: 1px solid rgba(0, 255, 0, 0.3); }
+        .off { background: rgba(255, 0, 0, 0.15); color: #ff4d4d; border: 1px solid rgba(255, 0, 0, 0.3); }
+        
+        .box-section { 
+            background: #1e1e1e; 
+            padding: 20px 15px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .box-title { 
+            color: #00d2ff; 
+            margin-top: 0; 
+            margin-bottom: 20px; 
+            font-size: 16px; 
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .flex-row { display: flex; gap: 12px; }
         .flex-row .form-group { flex: 1; }
+
+        /* Gaya Tombol Mengambang (Floating Action Button Area) */
+        .floating-action {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-top: 1px solid #333;
+            z-index: 1000;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
+
+        .floating-action button { 
+            width: 100%; 
+            padding: 16px; 
+            background: #00d2ff; 
+            color: #000; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        .floating-action button:active { background: #0096c7; transform: scale(0.98); }
+
+        /* Loader Ringan */
+        #loader { display: none; text-align: center; color: #00d2ff; font-size: 14px; margin-top: 5px;}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>⚙️ Bot Control Panel</h2>
-    <div id="statusIndicator" class="status-box on">Memuat Status...</div>
+    
+    <div id="statusIndicator" class="status-box on">Menghubungkan ke Cloudflare...</div>
 
     <div class="box-section">
-        <h4 class="box-title">Main Settings</h4>
+        <h4 class="box-title">Kontrol Utama</h4>
         <div class="form-group">
             <label>Status Bot (Kill Switch)</label>
             <select id="bot_status">
@@ -42,8 +119,8 @@
             <div class="form-group"><label>Lot Size</label><input type="number" step="0.01" id="lot" /></div>
         </div>
         <div class="flex-row">
-            <div class="form-group"><label>Max Sinyal/Tren</label><input type="number" id="max_signals" /></div>
-            <div class="form-group"><label>Tembakan Order</label><input type="number" id="tps" /></div>
+            <div class="form-group"><label>Max Sinyal</label><input type="number" id="max_signals" /></div>
+            <div class="form-group"><label>Jumlah Entry</label><input type="number" id="tps" /></div>
         </div>
         <div class="flex-row">
             <div class="form-group"><label>Stop Loss ($)</label><input type="number" step="0.1" id="sl" /></div>
@@ -54,10 +131,10 @@
     <div class="box-section">
         <h4 class="box-title">Trailing Stop ($)</h4>
         <div class="form-group">
-            <label>Gunakan Trailing Stop?</label>
+            <label>Status Trailing Stop</label>
             <select id="use_trailing">
-                <option value="1">✅ Ya (Aktif)</option>
-                <option value="0">❌ Tidak (Mati)</option>
+                <option value="1">✅ Aktif</option>
+                <option value="0">❌ Mati</option>
             </select>
         </div>
         <div class="flex-row"><div class="form-group"><label>Trigger 1</label><input type="number" id="tt1"></div><div class="form-group"><label>Lock 1</label><input type="number" id="tl1"></div></div>
@@ -66,8 +143,12 @@
         <div class="flex-row"><div class="form-group"><label>Trigger 4</label><input type="number" id="tt4"></div><div class="form-group"><label>Lock 4</label><input type="number" id="tl4"></div></div>
         <div class="flex-row"><div class="form-group"><label>Trigger 5</label><input type="number" id="tt5"></div><div class="form-group"><label>Lock 5</label><input type="number" id="tl5"></div></div>
     </div>
+</div>
 
-    <button onclick="saveSettings()">Simpan & Update Bot MT5</button>
+<!-- TOMBOL MENGAMBANG DI BAWAH -->
+<div class="floating-action">
+    <button onclick="saveSettings()">SIMPAN PENGATURAN</button>
+    <div id="loader">Menyimpan...</div>
 </div>
 
 <script>
@@ -92,10 +173,15 @@
                 document.getElementById('tl'+i).value = data['tl'+i];
             }
             updateIndicator(data.status);
-        } catch (e) { alert("Gagal memuat data dari Cloudflare!"); }
+        } catch (e) { 
+            const box = document.getElementById('statusIndicator');
+            box.className = "status-box off"; 
+            box.innerText = "Gagal memuat data dari Cloudflare."; 
+        }
     }
 
     async function saveSettings() {
+        document.getElementById('loader').style.display = 'block';
         const payload = {
             status: parseInt(document.getElementById('bot_status').value),
             ema: parseInt(document.getElementById('ema').value),
@@ -115,16 +201,20 @@
             const res = await fetch(WORKER_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
             const result = await res.json();
             if(result.success) {
-                alert("Berhasil! Semua parameter terkirim ke MT5.");
                 updateIndicator(payload.status);
+                alert("Berhasil! Bot MT5 akan menyesuaikan secara otomatis.");
             }
-        } catch (e) { alert("Gagal menyimpan data!"); }
+        } catch (e) { 
+            alert("Gagal menyimpan data! Periksa koneksi."); 
+        } finally {
+            document.getElementById('loader').style.display = 'none';
+        }
     }
 
     function updateIndicator(status) {
         const box = document.getElementById('statusIndicator');
-        if(status === 1) { box.className = "status-box on"; box.innerText = "STATUS: BOT SEDANG BERJALAN 🟢"; } 
-        else { box.className = "status-box off"; box.innerText = "STATUS: BOT DIMATIKAN 🔴"; }
+        if(status === 1) { box.className = "status-box on"; box.innerText = "BOT AKTIF 🟢"; } 
+        else { box.className = "status-box off"; box.innerText = "BOT DIMATIKAN 🔴"; }
     }
 
     loadSettings();
