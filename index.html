@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProReversal Bot Control Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #ffffff; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: #1e1e1e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2 { text-align: center; color: #00d2ff; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #bbb; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #444; border-radius: 5px; background: #2a2a2a; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #00d2ff; color: #000; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        button:hover { background: #0096c7; }
+        .status-box { padding: 15px; text-align: center; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
+        .on { background: rgba(0, 255, 0, 0.2); color: #00ff00; border: 1px solid #00ff00; }
+        .off { background: rgba(255, 0, 0, 0.2); color: #ff4d4d; border: 1px solid #ff4d4d; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>⚙️ Bot Control Panel</h2>
+    
+    <div id="statusIndicator" class="status-box on">Memuat Status...</div>
+
+    <div class="form-group">
+        <label>Status Bot (Kill Switch)</label>
+        <select id="bot_status">
+            <option value="1">🟢 ON (Trading Aktif)</option>
+            <option value="0">🔴 OFF (Hentikan Bot)</option>
+        </select>
+    </div>
+
+    <div class="form-group"><label>EMA Period (Filter Tren)</label><input type="number" id="ema" /></div>
+    <div class="form-group"><label>Maksimal Sinyal / Tren</label><input type="number" id="max_signals" /></div>
+    <div class="form-group"><label>Lot Size</label><input type="number" step="0.01" id="lot" /></div>
+    <div class="form-group"><label>Take Profit ($)</label><input type="number" step="0.1" id="tp" /></div>
+    <div class="form-group"><label>Stop Loss ($)</label><input type="number" step="0.1" id="sl" /></div>
+
+    <button onclick="saveSettings()">Simpan & Update Bot (Real-time)</button>
+</div>
+
+<script>
+    // MASUKKAN URL CLOUDFLARE WORKER ANDA DI SINI!
+    const WORKER_URL = "https://worker-anda.subdomain.workers.dev";
+
+    async function loadSettings() {
+        try {
+            const res = await fetch(WORKER_URL);
+            const data = await res.json();
+            
+            document.getElementById('bot_status').value = data.status;
+            document.getElementById('ema').value = data.ema;
+            document.getElementById('max_signals').value = data.max_signals;
+            document.getElementById('lot').value = data.lot;
+            document.getElementById('tp').value = data.tp;
+            document.getElementById('sl').value = data.sl;
+
+            updateIndicator(data.status);
+        } catch (e) {
+            alert("Gagal terhubung ke Cloudflare!");
+        }
+    }
+
+    async function saveSettings() {
+        const payload = {
+            status: parseInt(document.getElementById('bot_status').value),
+            ema: parseInt(document.getElementById('ema').value),
+            max_signals: parseInt(document.getElementById('max_signals').value),
+            lot: parseFloat(document.getElementById('lot').value),
+            tp: parseFloat(document.getElementById('tp').value),
+            sl: parseFloat(document.getElementById('sl').value)
+        };
+
+        try {
+            const res = await fetch(WORKER_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if(result.success) {
+                alert("Berhasil! Bot MT5 akan menyesuaikan dalam 3 detik.");
+                updateIndicator(payload.status);
+            }
+        } catch (e) {
+            alert("Gagal menyimpan data!");
+        }
+    }
+
+    function updateIndicator(status) {
+        const box = document.getElementById('statusIndicator');
+        if(status === 1) {
+            box.className = "status-box on"; box.innerText = "STATUS: BOT SEDANG BERJALAN 🟢";
+        } else {
+            box.className = "status-box off"; box.innerText = "STATUS: BOT DIMATIKAN 🔴";
+        }
+    }
+
+    // Load saat halaman dibuka
+    loadSettings();
+</script>
+</body>
+</html>
