@@ -5,104 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bot Control Panel</title>
     <style>
-        /* Gaya Dasar & Mobile-First */
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: #121212; 
-            color: #ffffff; 
-            margin: 0; 
-            padding: 0;
-            padding-bottom: 80px; /* Memberi ruang untuk tombol mengambang di bawah */
-        }
-        
-        .container { 
-            max-width: 100%; 
-            padding: 15px; 
-            box-sizing: border-box;
-        }
-
+        /* Gaya Dasar & Mobile-First (Sama seperti sebelumnya) */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 0; padding-bottom: 80px; }
+        .container { max-width: 100%; padding: 15px; box-sizing: border-box; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 600; color: #ccc; font-size: 14px; }
-        
-        input, select { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1px solid #444; 
-            border-radius: 8px; 
-            background: #2a2a2a; 
-            color: #fff; 
-            font-size: 16px; /* Mencegah auto-zoom di iPhone */
-            box-sizing: border-box; 
-        }
-
-        .status-box { 
-            padding: 15px; 
-            text-align: center; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            font-weight: bold;
-            font-size: 14px;
-        }
+        input, select { width: 100%; padding: 12px; border: 1px solid #444; border-radius: 8px; background: #2a2a2a; color: #fff; font-size: 16px; box-sizing: border-box; }
+        .status-box { padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 20px; font-weight: bold; font-size: 14px; }
         .on { background: rgba(0, 255, 0, 0.15); color: #00ff00; border: 1px solid rgba(0, 255, 0, 0.3); }
         .off { background: rgba(255, 0, 0, 0.15); color: #ff4d4d; border: 1px solid rgba(255, 0, 0, 0.3); }
-        
-        .box-section { 
-            background: #1e1e1e; 
-            padding: 20px 15px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
-        
-        .box-title { 
-            color: #00d2ff; 
-            margin-top: 0; 
-            margin-bottom: 20px; 
-            font-size: 16px; 
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
+        .box-section { background: #1e1e1e; padding: 20px 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .box-title { color: #00d2ff; margin-top: 0; margin-bottom: 20px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         .flex-row { display: flex; gap: 12px; }
         .flex-row .form-group { flex: 1; }
-
-        /* Gaya Tombol Mengambang (Floating Action Button Area) */
-        .floating-action {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(18, 18, 18, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px;
-            border-top: 1px solid #333;
-            z-index: 1000;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
-        }
-
-        .floating-action button { 
-            width: 100%; 
-            padding: 16px; 
-            background: #00d2ff; 
-            color: #000; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.2s;
-        }
+        .floating-action { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(10px); padding: 15px; border-top: 1px solid #333; z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
+        .floating-action button { width: 100%; padding: 16px; background: #00d2ff; color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .floating-action button:active { background: #0096c7; transform: scale(0.98); }
-
-        /* Loader Ringan */
         #loader { display: none; text-align: center; color: #00d2ff; font-size: 14px; margin-top: 5px;}
     </style>
 </head>
 <body>
 
 <div class="container">
-    
     <div id="statusIndicator" class="status-box on">Menghubungkan ke Cloudflare...</div>
 
     <div class="box-section">
@@ -113,6 +37,11 @@
                 <option value="1">🟢 ON (Trading Aktif)</option>
                 <option value="0">🔴 OFF (Hentikan Bot)</option>
             </select>
+        </div>
+        <!-- TAMBAHAN: Input Magic Number -->
+        <div class="form-group">
+            <label>Magic Number</label>
+            <input type="number" id="magic" placeholder="Contoh: 999111" />
         </div>
         <div class="flex-row">
             <div class="form-group"><label>EMA Period</label><input type="number" id="ema" /></div>
@@ -128,6 +57,7 @@
         </div>
     </div>
 
+    <!-- Bagian Trailing Stop (Sama seperti sebelumnya) -->
     <div class="box-section">
         <h4 class="box-title">Trailing Stop ($)</h4>
         <div class="form-group">
@@ -145,7 +75,6 @@
     </div>
 </div>
 
-<!-- TOMBOL MENGAMBANG DI BAWAH -->
 <div class="floating-action">
     <button onclick="saveSettings()">SIMPAN PENGATURAN</button>
     <div id="loader">Menyimpan...</div>
@@ -160,6 +89,7 @@
             const data = await res.json();
             
             document.getElementById('bot_status').value = data.status;
+            document.getElementById('magic').value = data.magic; // Load Magic Number
             document.getElementById('ema').value = data.ema;
             document.getElementById('lot').value = data.lot;
             document.getElementById('tp').value = data.tp;
@@ -184,6 +114,7 @@
         document.getElementById('loader').style.display = 'block';
         const payload = {
             status: parseInt(document.getElementById('bot_status').value),
+            magic: parseInt(document.getElementById('magic').value), // Save Magic Number
             ema: parseInt(document.getElementById('ema').value),
             lot: parseFloat(document.getElementById('lot').value),
             tp: parseFloat(document.getElementById('tp').value),
