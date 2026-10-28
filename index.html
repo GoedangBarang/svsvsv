@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bot Control Panel</title>
+    <title>Bot Control Panel v6.0</title>
     <style>
-        /* Gaya Dasar & Mobile-First (Sama seperti sebelumnya) */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 0; padding-bottom: 80px; }
         .container { max-width: 100%; padding: 15px; box-sizing: border-box; }
         .form-group { margin-bottom: 15px; }
@@ -22,6 +21,7 @@
         .floating-action button { width: 100%; padding: 16px; background: #00d2ff; color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .floating-action button:active { background: #0096c7; transform: scale(0.98); }
         #loader { display: none; text-align: center; color: #00d2ff; font-size: 14px; margin-top: 5px;}
+        .info-text { font-size: 12px; color: #888; margin-top: -10px; margin-bottom: 15px; display: block; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -30,7 +30,7 @@
     <div id="statusIndicator" class="status-box on">Menghubungkan ke Cloudflare...</div>
 
     <div class="box-section">
-        <h4 class="box-title">Kontrol Utama</h4>
+        <h4 class="box-title">Kontrol Umum & Risiko</h4>
         <div class="form-group">
             <label>Status Bot (Kill Switch)</label>
             <select id="bot_status">
@@ -38,40 +38,50 @@
                 <option value="0">🔴 OFF (Hentikan Bot)</option>
             </select>
         </div>
-        <!-- TAMBAHAN: Input Magic Number -->
         <div class="form-group">
             <label>Magic Number</label>
             <input type="number" id="magic" placeholder="Contoh: 999111" />
         </div>
         <div class="flex-row">
-            <div class="form-group"><label>EMA Period</label><input type="number" id="ema" /></div>
             <div class="form-group"><label>Lot Size</label><input type="number" step="0.01" id="lot" /></div>
-        </div>
-        <div class="flex-row">
             <div class="form-group"><label>Max Sinyal</label><input type="number" id="max_signals" /></div>
-            <div class="form-group"><label>Jumlah Entry</label><input type="number" id="tps" /></div>
         </div>
         <div class="flex-row">
             <div class="form-group"><label>Stop Loss ($)</label><input type="number" step="0.1" id="sl" /></div>
             <div class="form-group"><label>Take Profit ($)</label><input type="number" step="0.1" id="tp" /></div>
         </div>
+        <div class="form-group">
+            <label>Jumlah Entry per Sinyal</label>
+            <input type="number" id="tps" />
+        </div>
     </div>
 
-    <!-- Bagian Trailing Stop (Sama seperti sebelumnya) -->
+    <!-- STRATEGI 1 -->
     <div class="box-section">
-        <h4 class="box-title">Trailing Stop ($)</h4>
+        <h4 class="box-title">Strategi 1 (Dua Arah)</h4>
         <div class="form-group">
-            <label>Status Trailing Stop</label>
-            <select id="use_trailing">
-                <option value="1">✅ Aktif</option>
-                <option value="0">❌ Mati</option>
+            <label>EMA Utama (Contoh: 1000)</label>
+            <input type="number" id="ema" />
+        </div>
+        <span class="info-text">Mencari Buy jika harga di atas EMA, dan Sell jika di bawah. (Isi 0 untuk mematikan)</span>
+    </div>
+
+    <!-- STRATEGI 2 -->
+    <div class="box-section">
+        <h4 class="box-title">Strategi 2 (Satu Arah)</h4>
+        <div class="form-group">
+            <label>Mode Eksekusi Arah</label>
+            <select id="mode2">
+                <option value="-1">🔴 HANYA MENCARI SELL</option>
+                <option value="1">🟢 HANYA MENCARI BUY</option>
+                <option value="0">❌ MATIKAN STRATEGI 2</option>
             </select>
         </div>
-        <div class="flex-row"><div class="form-group"><label>Trigger 1</label><input type="number" id="tt1"></div><div class="form-group"><label>Lock 1</label><input type="number" id="tl1"></div></div>
-        <div class="flex-row"><div class="form-group"><label>Trigger 2</label><input type="number" id="tt2"></div><div class="form-group"><label>Lock 2</label><input type="number" id="tl2"></div></div>
-        <div class="flex-row"><div class="form-group"><label>Trigger 3</label><input type="number" id="tt3"></div><div class="form-group"><label>Lock 3</label><input type="number" id="tl3"></div></div>
-        <div class="flex-row"><div class="form-group"><label>Trigger 4</label><input type="number" id="tt4"></div><div class="form-group"><label>Lock 4</label><input type="number" id="tl4"></div></div>
-        <div class="flex-row"><div class="form-group"><label>Trigger 5</label><input type="number" id="tt5"></div><div class="form-group"><label>Lock 5</label><input type="number" id="tl5"></div></div>
+        <div class="form-group">
+            <label>EMA Filter Arah (Contoh: 200)</label>
+            <input type="number" id="ema2" />
+        </div>
+        <span class="info-text">Bot memantau Breakout/Reversal pada EMA ini. Jika harga berbalik menembus EMA ke arah yang salah, semua posisi otomatis dibabat habis.</span>
     </div>
 </div>
 
@@ -88,21 +98,20 @@
             const res = await fetch(WORKER_URL);
             const data = await res.json();
             
-            document.getElementById('bot_status').value = data.status;
-            document.getElementById('magic').value = data.magic; // Load Magic Number
-            document.getElementById('ema').value = data.ema;
-            document.getElementById('lot').value = data.lot;
-            document.getElementById('tp').value = data.tp;
-            document.getElementById('sl').value = data.sl;
-            document.getElementById('max_signals').value = data.max_signals;
-            document.getElementById('tps').value = data.trades_per_signal;
-            document.getElementById('use_trailing').value = data.use_trailing;
+            document.getElementById('bot_status').value = data.status !== undefined ? data.status : 1;
+            document.getElementById('magic').value = data.magic !== undefined ? data.magic : 999111;
+            document.getElementById('lot').value = data.lot !== undefined ? data.lot : 0.01;
+            document.getElementById('sl').value = data.sl !== undefined ? data.sl : 5.0;
+            document.getElementById('tp').value = data.tp !== undefined ? data.tp : 10.0;
+            document.getElementById('max_signals').value = data.max_signals !== undefined ? data.max_signals : 1;
+            document.getElementById('tps').value = data.trades_per_signal !== undefined ? data.trades_per_signal : 1;
             
-            for(let i=1; i<=5; i++){
-                document.getElementById('tt'+i).value = data['tt'+i];
-                document.getElementById('tl'+i).value = data['tl'+i];
-            }
-            updateIndicator(data.status);
+            document.getElementById('ema').value = data.ema !== undefined ? data.ema : 1000;
+            
+            document.getElementById('ema2').value = data.ema2 !== undefined ? data.ema2 : 200;
+            document.getElementById('mode2').value = data.mode2 !== undefined ? data.mode2 : -1;
+
+            updateIndicator(parseInt(document.getElementById('bot_status').value));
         } catch (e) { 
             const box = document.getElementById('statusIndicator');
             box.className = "status-box off"; 
@@ -114,26 +123,29 @@
         document.getElementById('loader').style.display = 'block';
         const payload = {
             status: parseInt(document.getElementById('bot_status').value),
-            magic: parseInt(document.getElementById('magic').value), // Save Magic Number
-            ema: parseInt(document.getElementById('ema').value),
+            magic: parseInt(document.getElementById('magic').value),
             lot: parseFloat(document.getElementById('lot').value),
-            tp: parseFloat(document.getElementById('tp').value),
             sl: parseFloat(document.getElementById('sl').value),
+            tp: parseFloat(document.getElementById('tp').value),
             max_signals: parseInt(document.getElementById('max_signals').value),
             trades_per_signal: parseInt(document.getElementById('tps').value),
-            use_trailing: parseInt(document.getElementById('use_trailing').value)
+            
+            ema: parseInt(document.getElementById('ema').value),
+            
+            ema2: parseInt(document.getElementById('ema2').value),
+            mode2: parseInt(document.getElementById('mode2').value)
         };
-        for(let i=1; i<=5; i++){
-            payload['tt'+i] = parseFloat(document.getElementById('tt'+i).value);
-            payload['tl'+i] = parseFloat(document.getElementById('tl'+i).value);
-        }
 
         try {
-            const res = await fetch(WORKER_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+            const res = await fetch(WORKER_URL, { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" }, 
+                body: JSON.stringify(payload) 
+            });
             const result = await res.json();
             if(result.success) {
                 updateIndicator(payload.status);
-                alert("Berhasil! Bot MT5 akan menyesuaikan secara otomatis.");
+                alert("Berhasil! Bot MT5 akan menyesuaikan strategi secara otomatis.");
             }
         } catch (e) { 
             alert("Gagal menyimpan data! Periksa koneksi."); 
