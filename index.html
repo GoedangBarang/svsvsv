@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bot Control Panel v6.0</title>
+    <title>Bot Control Panel v6.3</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 0; padding-bottom: 80px; }
         .container { max-width: 100%; padding: 15px; box-sizing: border-box; }
@@ -34,8 +34,8 @@
         <div class="form-group">
             <label>Status Bot (Kill Switch)</label>
             <select id="bot_status">
-                <option value="1">🟢 ON (Trading Aktif)</option>
-                <option value="0">🔴 OFF (Hentikan Bot)</option>
+                <option value="1">✅ ON (Trading Aktif)</option>
+                <option value="0">❌ OFF (Hentikan Bot)</option>
             </select>
         </div>
         <div class="form-group">
@@ -72,9 +72,9 @@
         <div class="form-group">
             <label>Mode Eksekusi Arah</label>
             <select id="mode2">
-                <option value="-1">🔴 HANYA MENCARI SELL</option>
-                <option value="1">🟢 HANYA MENCARI BUY</option>
-                <option value="0">❌ MATIKAN STRATEGI 2</option>
+                <option value="-1">❌ HANYA MENCARI SELL</option>
+                <option value="1">✅ HANYA MENCARI BUY</option>
+                <option value="0">🛑 MATIKAN STRATEGI 2</option>
             </select>
         </div>
         <div class="form-group">
@@ -82,6 +82,24 @@
             <input type="number" id="ema2" />
         </div>
         <span class="info-text">Bot memantau Breakout/Reversal pada EMA ini. Jika harga berbalik menembus EMA ke arah yang salah, semua posisi otomatis dibabat habis.</span>
+    </div>
+
+    <!-- STRATEGI 3 -->
+    <div class="box-section">
+        <h4 class="box-title">Strategi 3 (Satu Arah Independen)</h4>
+        <div class="form-group">
+            <label>Mode Eksekusi Arah 3</label>
+            <select id="mode3">
+                <option value="-1">❌ HANYA MENCARI SELL</option>
+                <option value="1">✅ HANYA MENCARI BUY</option>
+                <option value="0">🛑 MATIKAN STRATEGI 3</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>EMA Filter Arah 3 (Contoh: 50)</label>
+            <input type="number" id="ema3" />
+        </div>
+        <span class="info-text">Strategi clone dari Strategi 2 dengan EMA berbeda. Memiliki Magic Number tersendiri dan tidak menabrak strategi lain.</span>
     </div>
 </div>
 
@@ -111,6 +129,9 @@
             document.getElementById('ema2').value = data.ema2 !== undefined ? data.ema2 : 200;
             document.getElementById('mode2').value = data.mode2 !== undefined ? data.mode2 : -1;
 
+            document.getElementById('ema3').value = data.ema3 !== undefined ? data.ema3 : 50;
+            document.getElementById('mode3').value = data.mode3 !== undefined ? data.mode3 : 0;
+
             updateIndicator(parseInt(document.getElementById('bot_status').value));
         } catch (e) { 
             const box = document.getElementById('statusIndicator');
@@ -133,7 +154,10 @@
             ema: parseInt(document.getElementById('ema').value),
             
             ema2: parseInt(document.getElementById('ema2').value),
-            mode2: parseInt(document.getElementById('mode2').value)
+            mode2: parseInt(document.getElementById('mode2').value),
+
+            ema3: parseInt(document.getElementById('ema3').value),
+            mode3: parseInt(document.getElementById('mode3').value)
         };
 
         try {
@@ -156,8 +180,8 @@
 
     function updateIndicator(status) {
         const box = document.getElementById('statusIndicator');
-        if(status === 1) { box.className = "status-box on"; box.innerText = "BOT AKTIF 🟢"; } 
-        else { box.className = "status-box off"; box.innerText = "BOT DIMATIKAN 🔴"; }
+        if(status === 1) { box.className = "status-box on"; box.innerText = "BOT AKTIF ✅"; } 
+        else { box.className = "status-box off"; box.innerText = "BOT DIMATIKAN ❌"; }
     }
 
     loadSettings();
